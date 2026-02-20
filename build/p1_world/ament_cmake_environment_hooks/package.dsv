@@ -1,0 +1,4 @@
+source;share/p1_world/local_setup.bash
+source;share/p1_world/local_setup.dsv
+source;share/p1_world/local_setup.sh
+source;share/p1_world/local_setup.zsh

@@ -1,0 +1,17 @@
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/launch/sim.launch.py
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/worlds/world.sdf
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/ament_index/resource_index/package_run_dependencies/p1_world
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/ament_index/resource_index/parent_prefix_path/p1_world
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/environment/ament_prefix_path.sh
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/environment/ament_prefix_path.dsv
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/environment/path.sh
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/environment/path.dsv
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/local_setup.bash
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/local_setup.sh
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/local_setup.zsh
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/local_setup.dsv
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/package.dsv
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/ament_index/resource_index/packages/p1_world
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/cmake/p1_worldConfig.cmake
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/cmake/p1_worldConfig-version.cmake
+/home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/package.xml
