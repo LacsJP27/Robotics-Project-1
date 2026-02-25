@@ -1,9 +1,0 @@
-/home/lacs0000/ros2_ws/src/project_1/build/p1_world/CMakeFiles/uninstall.dir
-/home/lacs0000/ros2_ws/src/project_1/build/p1_world/CMakeFiles/p1_world_uninstall.dir
-/home/lacs0000/ros2_ws/src/project_1/build/p1_world/CMakeFiles/test.dir
-/home/lacs0000/ros2_ws/src/project_1/build/p1_world/CMakeFiles/edit_cache.dir
-/home/lacs0000/ros2_ws/src/project_1/build/p1_world/CMakeFiles/rebuild_cache.dir
-/home/lacs0000/ros2_ws/src/project_1/build/p1_world/CMakeFiles/list_install_components.dir
-/home/lacs0000/ros2_ws/src/project_1/build/p1_world/CMakeFiles/install.dir
-/home/lacs0000/ros2_ws/src/project_1/build/p1_world/CMakeFiles/install/local.dir
-/home/lacs0000/ros2_ws/src/project_1/build/p1_world/CMakeFiles/install/strip.dir

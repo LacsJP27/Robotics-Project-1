@@ -1,0 +1,29 @@
+[0.013s] Invoking command in '/home/lacs0000/ros2_ws/src/project_1/build/p1_world': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake /home/lacs0000/ros2_ws/src/project_1/src/p1_world -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/lacs0000/ros2_ws/src/project_1/install/p1_world
+[0.279s] -- Found ament_cmake: 2.5.4 (/opt/ros/jazzy/share/ament_cmake/cmake)
+[0.779s] -- Override CMake install command with custom implementation using symlinks instead of copying resources
+[0.901s] -- Found ament_lint_auto: 0.17.3 (/opt/ros/jazzy/share/ament_lint_auto/cmake)
+[1.166s] -- Added test 'flake8' to check Python code syntax and style conventions
+[1.166s] -- Configured 'flake8' exclude dirs and/or files: 
+[1.179s] -- Added test 'lint_cmake' to check CMake code style
+[1.181s] -- Added test 'pep257' to check Python code against some of the docstring style conventions in PEP 257
+[1.186s] -- Added test 'xmllint' to check XML markup files
+[1.192s] -- Configuring done (1.1s)
+[1.231s] -- Generating done (0.0s)
+[1.237s] -- Build files have been written to: /home/lacs0000/ros2_ws/src/project_1/build/p1_world
+[1.246s] Invoked command in '/home/lacs0000/ros2_ws/src/project_1/build/p1_world' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake /home/lacs0000/ros2_ws/src/project_1/src/p1_world -DAMENT_CMAKE_SYMLINK_INSTALL=1 -DCMAKE_INSTALL_PREFIX=/home/lacs0000/ros2_ws/src/project_1/install/p1_world
+[1.249s] Invoking command in '/home/lacs0000/ros2_ws/src/project_1/build/p1_world': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/lacs0000/ros2_ws/src/project_1/build/p1_world -- -j4 -l4
+[1.369s] Invoked command in '/home/lacs0000/ros2_ws/src/project_1/build/p1_world' returned '0': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --build /home/lacs0000/ros2_ws/src/project_1/build/p1_world -- -j4 -l4
+[1.384s] Invoking command in '/home/lacs0000/ros2_ws/src/project_1/build/p1_world': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/lacs0000/ros2_ws/src/project_1/build/p1_world
+[1.397s] -- Install configuration: ""
+[1.398s] -- Execute custom install script
+[1.398s] -- Symlinking: /home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/launch/sim.launch.py
+[1.413s] -- Symlinking: /home/lacs0000/ros2_ws/src/project_1/install/p1_world/share/p1_world/worlds/world.sdf
+[1.428s] [31mCMake Error at ament_cmake_symlink_install/ament_cmake_symlink_install.cmake:100 (message):
+[1.428s]   ament_cmake_symlink_install_directory() can't find
+[1.428s]   '/home/lacs0000/ros2_ws/src/project_1/src/p1_world/models'
+[1.428s] Call Stack (most recent call first):
+[1.428s]   ament_cmake_symlink_install/ament_cmake_symlink_install.cmake:314 (ament_cmake_symlink_install_directory)
+[1.428s]   cmake_install.cmake:46 (include)
+[1.428s] 
+[1.428s] [0m
+[1.430s] Invoked command in '/home/lacs0000/ros2_ws/src/project_1/build/p1_world' returned '1': CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/ros/jazzy DEBUGINFOD_URLS=https://debuginfod.ubuntu.com /usr/bin/cmake --install /home/lacs0000/ros2_ws/src/project_1/build/p1_world
