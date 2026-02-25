@@ -1,5 +1,0 @@
-[0.000000] (-) TimerEvent: {}
-[0.000210] (p1_world) JobQueued: {'identifier': 'p1_world', 'dependencies': OrderedDict({'p1_world': '/home/lacs0000/ros2_ws/src/project_1/install/p1_world'})}
-[0.000311] (p1_world) JobStarted: {'identifier': 'p1_world'}
-[0.014366] (p1_world) JobEnded: {'identifier': 'p1_world', 'rc': 1}
-[0.024769] (-) EventReactorShutdown: {}
