@@ -9,37 +9,38 @@
       <real_time_factor>1.0</real_time_factor>
     </physics>
 
-    <!-- Required Plugins -->
-    <plugin filename="gz-sim-physics-system"
-            name="gz::sim::systems::Physics"/>
-    <plugin filename="gz-sim-user-commands-system"
-            name="gz::sim::systems::UserCommands"/>
-    <plugin filename="gz-sim-scene-broadcaster-system"
-            name="gz::sim::systems::SceneBroadcaster"/>
-    <plugin filename="gz-sim-sensors-system"
-            name="gz::sim::systems::Sensors">
+    <!-- Required Gazebo Sim plugins -->
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
       <render_engine>ogre2</render_engine>
     </plugin>
-    <plugin filename="gz-sim-imu-system"
-            name="gz::sim::systems::Imu"/>
+    <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu"/>
 
-    <!-- Light -->
+    <!-- Brighter scene (all values 0..1) -->
+    <scene>
+      <ambient>0.75 0.75 0.75 1</ambient>
+      <background>1 1 1 1</background>
+    </scene>
+
     <light name="sun" type="directional">
-      <pose>0 0 10 0 0 0</pose>
+      <pose>0 0 15 0 0 0</pose>
       <diffuse>1 1 1 1</diffuse>
-      <specular>0.1 0.1 0.1 1</specular>
-      <direction>-0.5 0.5 -1</direction>
+      <specular>0.3 0.3 0.3 1</specular>
+      <direction>0 0 -1</direction>
     </light>
 
-    <!-- Ground -->
+    <!-- White ground -->
     <model name="ground_plane">
       <static>true</static>
+      <pose>0 0 0 0 0 0</pose>
       <link name="link">
         <collision name="collision">
           <geometry>
             <plane>
               <normal>0 0 1</normal>
-              <size>20 20</size>
+              <size>30 30</size>
             </plane>
           </geometry>
         </collision>
@@ -47,59 +48,118 @@
           <geometry>
             <plane>
               <normal>0 0 1</normal>
-              <size>20 20</size>
+              <size>30 30</size>
             </plane>
           </geometry>
+          <material>
+            <ambient>1 1 1 1</ambient>
+            <diffuse>1 1 1 1</diffuse>
+            <specular>0.1 0.1 0.1 1</specular>
+          </material>
         </visual>
       </link>
     </model>
 
-    <!-- Example Wall (Room North Wall) -->
-    <model name="north_wall">
+    <!-- =========================================================
+         EXACT DIMENSIONS (meters)   1 ft = 0.3048 m
+
+         Hallway wraps around RIGHT + BOTTOM (backwards L)
+         Hall width: 5'  = 1.524 m
+
+         Outer bounding rectangle:
+           width  = 15' = 4.572 m  => x in [-2.286, +2.286]
+           long   = 20' = 6.096 m  => y in [-3.048, +3.048]
+
+         Room (15' long x 10' wide):
+           long  = 15' = 4.572 m  (vertical)
+           wide  = 10' = 3.048 m  (horizontal)
+           Room occupies: x in [-2.286, +0.762]  (10' wide)
+                          y in [-1.524, +3.048]  (15' long)
+
+         Inner room doorway on the room's LONG side (15' side):
+           This is the RIGHT room wall at x = +0.762 (vertical wall).
+           doorway width = 5' (1.524 m), centered within that 15' wall:
+           gap y in [0.0, 1.524]
+           => bottom wall segment 5', top wall segment 5'
+
+         (Outer hallway doorway removed)
+         ========================================================= -->
+
+    <!-- Wall parameters -->
+    <!-- thickness = 0.10m, height = 2.0m, wall center z = 1.0m -->
+
+    <!-- ================= OUTER WALLS ================= -->
+
+    <!-- Outer top wall (15') -->
+    <model name="outer_top_wall">
       <static>true</static>
-      <pose>0 2.286 1.0 0 0 0</pose> <!-- Half of 15ft in meters -->
+      <pose>0 3.048 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="collision">
-          <geometry>
-            <box>
-              <size>4.572 0.2 2.0</size>
-            </box>
-          </geometry>
-        </collision>
-        <visual name="visual">
-          <geometry>
-            <box>
-              <size>4.572 0.2 2.0</size>
-            </box>
-          </geometry>
-          <material>
-            <ambient>0.8 0.8 0.8 1</ambient>
-          </material>
-        </visual>
+        <collision name="collision"><geometry><box><size>4.572 0.10 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>4.572 0.10 2.0</size></box></geometry></visual>
       </link>
     </model>
-    
-    <model name="south_wall">
+
+    <!-- Outer bottom wall (15') -->
+    <model name="outer_bottom_wall">
       <static>true</static>
-      <pose>0 2.286 1.0 0 0 0</pose> <!-- Half of 15ft in meters -->
+      <pose>0 -3.048 1.0 0 0 0</pose>
       <link name="link">
-        <collision name="collision">
-          <geometry>
-            <box>
-              <size>4.572 0.2 2.0</size>
-            </box>
-          </geometry>
-        </collision>
-        <visual name="visual">
-          <geometry>
-            <box>
-              <size>4.572 0.2 2.0</size>
-            </box>
-          </geometry>
-          <material>
-            <ambient>0.8 0.8 0.8 1</ambient>
-          </material>
-        </visual>
+        <collision name="collision"><geometry><box><size>4.572 0.10 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>4.572 0.10 2.0</size></box></geometry></visual>
+      </link>
+    </model>
+
+    <!-- Outer left wall (20') -->
+    <model name="outer_left_wall">
+      <static>true</static>
+      <pose>-2.286 0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.10 6.096 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.10 6.096 2.0</size></box></geometry></visual>
+      </link>
+    </model>
+
+    <!-- Outer right wall (20') - continuous (no doorway) -->
+    <model name="outer_right_wall">
+      <static>true</static>
+      <pose>2.286 0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.10 6.096 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.10 6.096 2.0</size></box></geometry></visual>
+      </link>
+    </model>
+
+    <!-- ============== INNER WALLS (room boundaries) ============== -->
+
+    <!-- Room bottom wall (separates room from bottom hall), 10' long -->
+    <model name="room_bottom_wall">
+      <static>true</static>
+      <pose>-0.762 -1.524 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>3.048 0.10 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>3.048 0.10 2.0</size></box></geometry></visual>
+      </link>
+    </model>
+
+    <!-- Room right wall (INNER wall) on the 15' side, with centered 5' doorway -->
+    <!-- Lower segment: y -1.524..0.0 => length 1.524 -->
+    <model name="room_right_wall_lower">
+      <static>true</static>
+      <pose>0.762 -0.762 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.10 1.524 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.10 1.524 2.0</size></box></geometry></visual>
+      </link>
+    </model>
+
+    <!-- Upper segment: y 1.524..3.048 => length 1.524 -->
+    <model name="room_right_wall_upper">
+      <static>true</static>
+      <pose>0.762 2.286 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="collision"><geometry><box><size>0.10 1.524 2.0</size></box></geometry></collision>
+        <visual name="visual"><geometry><box><size>0.10 1.524 2.0</size></box></geometry></visual>
       </link>
     </model>
 
