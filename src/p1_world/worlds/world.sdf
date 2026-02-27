@@ -78,10 +78,11 @@
         </visual>
       </link>
     </model>
-    
+
+    <!-- Room South Wall -->
     <model name="south_wall">
       <static>true</static>
-      <pose>0 2.286 1.0 0 0 0</pose> <!-- Half of 15ft in meters -->
+      <pose>0 -2.286 1.0 0 0 0</pose> <!-- Half of 15ft in meters -->
       <link name="link">
         <collision name="collision">
           <geometry>
@@ -94,6 +95,56 @@
           <geometry>
             <box>
               <size>4.572 0.2 2.0</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 1</ambient>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Room East Wall -->
+    <model name="east_wall">
+      <static>true</static>
+      <pose>2.286 0 1.0 0 0</pose> <!-- Half of 15ft in meters -->
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.2 4.572 2.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.2 4.572 2.0</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 1</ambient>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Room West Wall -->
+    <model name="west_wall">
+      <static>true</static>
+      <pose>-2.286 0 1.0 0 0 0</pose> <!-- Half of 15ft in meters -->
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.2 4.572 2.0</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.2 4.572 2.0</size>
             </box>
           </geometry>
           <material>
