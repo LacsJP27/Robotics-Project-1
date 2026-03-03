@@ -1,16 +1,25 @@
-run the following command in the root directory to build package
+run the following command in the root directory (ros2_ws) to build package
 ```
-colcon build
+colcon build --symlink-install
 ```
 
-Then source ros
+Then source ros in new terminal
 ```
 source install/setup.bash
 ```
 
-Run packafge
+Run world package
 ```
-ros2 launch <package_name> <launch_file.py>
+ ros2 launch p1_world tb4_in_world.launch.py
+```
+Run controller in new terminal
+```
+ros2 run project1_control controller
+```
+
+For keyboard control:
+```
+ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/cmd_vel_key
 ```
 
 To just view the world.sdf file
