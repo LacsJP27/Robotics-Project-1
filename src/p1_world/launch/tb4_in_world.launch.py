@@ -8,8 +8,8 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    pkg_share = get_package_share_directory('project1')
-    default_world = os.path.join(pkg_share, 'worlds', 'project1_world.sdf')
+    pkg_share = get_package_share_directory('p1_world')
+    default_world = os.path.join(pkg_share, 'worlds', 'world.sdf')
 
     world = LaunchConfiguration('world')
     slam = LaunchConfiguration('slam')
@@ -20,9 +20,10 @@ def generate_launch_description():
     
     controller = Node(
     package='project1_control',
-    executable='project1_controller',
+    executable='controller',
     name='project1_controller',
-    output='screen')
+    output='screen'
+    )
 
 
     return LaunchDescription([
