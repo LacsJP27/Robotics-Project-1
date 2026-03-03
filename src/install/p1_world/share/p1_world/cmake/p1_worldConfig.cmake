@@ -1,0 +1,1 @@
+/home/kand0007/ros2_dir/Robotics-Project-1/src/build/p1_world/ament_cmake_core/p1_worldConfig.cmake
