@@ -9,7 +9,6 @@ import math
 import random
 import time
 
-
 def yaw_from_quat(x: float, y: float, z: float, w: float) -> float:
     siny_cosp = 2.0 * (w * z + x * y)
     cosy_cosp = 1.0 - 2.0 * (y * y + z * z)
@@ -27,8 +26,10 @@ def wrap_to_pi(a: float) -> float:
 def angle_diff(target: float, current: float) -> float:
     return wrap_to_pi(target - current)
 
+ESCAPE_TIMEOUT_SEC = 3.0
 
 class Project1Controller(Node):
+
     def __init__(self):
         super().__init__('project1_controller')
 
@@ -42,6 +43,7 @@ class Project1Controller(Node):
 
         # Control Timer (20 Hz)
         self.timer = self.create_timer(0.05, self.control_loop)
+        self.escape_start_time = None  # for escape timeout
 
         # Internal State
         self.latest_scan = None
@@ -71,7 +73,7 @@ class Project1Controller(Node):
         # Constants
         self.one_ft_m = 0.3048
         self.front_half_angle = math.radians(30.0)   # front cone +/- 30 degrees
-        self.collision_thresh_m = 0.25               # safety stop threshold
+        self.collision_thresh_m = 0.15               # safety stop threshold
         self.forward_speed = 0.2
         self.turn_speed = 0.9
 
@@ -150,6 +152,7 @@ class Project1Controller(Node):
 
     def start_escape(self):
         # Escape: turn 180 +/- 30 degrees (fixed action pattern)
+        self.escape_start_time = self.get_clock().now()
         delta = random.uniform(math.radians(150.0), math.radians(210.0))
         self.escape_target_yaw = wrap_to_pi(self.yaw + delta)
         self.escape_active = True
@@ -208,20 +211,31 @@ class Project1Controller(Node):
 
         # PRIORITY 1: Halt on collision
         if self.is_colliding:
-            msg.linear.x = 0.0
-            msg.angular.z = 0.0
+            if not self.escape_active:
+                self.start_escape()
+            msg = self.rotate_toward(self.escape_target_yaw)
+            msg.linear.x = 0.0  # Guarantee no forward motion while colliding
             self.cmd_pub.publish(msg)
             return
-
+            
         # PRIORITY 2: Keyboard commands (only if recent)
         if self.key_is_active():
             self.cmd_pub.publish(self.manual_twist)
             return
 
         # PRIORITY 3: Escape (fixed action pattern)
+
         if self.escape_active:
             msg = self.rotate_toward(self.escape_target_yaw)
-            if abs(angle_diff(self.escape_target_yaw, self.yaw)) < 0.05:
+            elapsed = (self.get_clock().now() - self.escape_start_time).nanoseconds / 1e9
+            
+            self.get_logger().info(f"ESCAPING to {math.degrees(self.escape_target_yaw):.1f} deg")
+            self.get_logger().info(f"angle_diff enough? ={abs(angle_diff(self.escape_target_yaw, self.yaw)) < 0.05} deg")
+            self.get_logger().info(f"current yaw={math.degrees(self.yaw):.1f} deg")
+            self.get_logger().info(f"target yaw={math.degrees(self.escape_target_yaw):.1f} deg")
+            
+            if abs(angle_diff(self.escape_target_yaw, self.yaw)) < 0.05 or elapsed > ESCAPE_TIMEOUT_SEC:
+                self.get_logger().info("ESCAPE COMPLETE" if elapsed <= ESCAPE_TIMEOUT_SEC else "ESCAPE TIMEOUT")
                 self.escape_active = False
             self.cmd_pub.publish(msg)
             return
