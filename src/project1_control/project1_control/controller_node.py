@@ -97,7 +97,7 @@ class Project1Controller(Node):
 
         angle = msg.angle_min
         for r in msg.ranges:
-            if math.isfinite(r):
+            if math.isfinite(r) and r >= msg.range_min and r <= msg.range_max:
                 a = wrap_to_pi(angle)  # IMPORTANT: converts [0..2pi] to [-pi..pi] around "front=0"
                 if abs(a) <= self.front_half_angle:
                     if r < min_front:
