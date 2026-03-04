@@ -78,6 +78,8 @@ class Project1Controller(Node):
         # Behavior 3 (Escape) state
         self.escape_active = False
         self.escape_target_yaw = 0.0
+        self.avoid_active = False
+        self.avoid_target_yaw = 0.0
 
         # Behavior 5 (Random turn) state
         self.random_turn_active = False
@@ -151,12 +153,27 @@ class Project1Controller(Node):
         delta = random.uniform(math.radians(150.0), math.radians(210.0))
         self.escape_target_yaw = wrap_to_pi(self.yaw + delta)
         self.escape_active = True
+        self.random_turn_active = False  # interrupt any random turn in progress
+        self.avoid_active = False
 
     def start_random_turn(self):
         # Random turn +/- 15 degrees
         delta = random.uniform(math.radians(-15.0), math.radians(15.0))
         self.random_target_yaw = wrap_to_pi(self.yaw + delta)
         self.random_turn_active = True
+        self.escape_active = False  # interrupt any escape in progress
+        self.avoid_active = False
+    
+    def start_avoid_turn(self):
+        # Commit to turning 60-90° away from the closer side
+        if self.min_left < self.min_right:
+            delta = -random.uniform(math.radians(60.0), math.radians(90.0))
+        else:
+            delta = random.uniform(math.radians(60.0), math.radians(90.0))
+        self.avoid_target_yaw = wrap_to_pi(self.yaw + delta)
+        self.avoid_active = True
+        self.escape_active = False        # mutual exclusion
+        self.random_turn_active = False   # mutual exclusion
 
     def rotate_toward(self, target_yaw: float) -> Twist:
         msg = Twist()
@@ -171,12 +188,22 @@ class Project1Controller(Node):
         if self.last_turn_x is None:
             return 0.0
         return math.hypot(self.x - self.last_turn_x, self.y - self.last_turn_y)
+    
+    def front_is_blocked(self) -> bool:
+        # front blocked close enough to warrant an escape regardless of symmetry
+        return self.min_front < self.one_ft_m
     # --------------------------------------------
 
     def control_loop(self):
         if not (self.have_scan and self.have_odom):
             return
 
+        self.get_logger().info(
+            f"front={self.min_front:.2f} left={self.min_left:.2f} right={self.min_right:.2f} "
+            f"escape={self.escape_active} rand_turn={self.random_turn_active}"
+            f" avoid={self.avoid_active}"
+            f"front_blocked={self.front_is_blocked()}"
+        )
         msg = Twist()
 
         # PRIORITY 1: Halt on collision
@@ -199,20 +226,24 @@ class Project1Controller(Node):
             self.cmd_pub.publish(msg)
             return
 
-        if self.symmetric_obstacles():
+        if self.symmetric_obstacles() or self.front_is_blocked():
             self.start_escape()
             msg = self.rotate_toward(self.escape_target_yaw)
             self.cmd_pub.publish(msg)
             return
 
         # PRIORITY 4: Avoid (reflex)
+        if self.avoid_active:
+            msg = self.rotate_toward(self.avoid_target_yaw)
+            if abs(angle_diff(self.avoid_target_yaw, self.yaw)) < 0.05:
+                self.avoid_active = False
+                self.last_turn_x = self.x     # reset wander distance counter
+                self.last_turn_y = self.y
+            self.cmd_pub.publish(msg)
+            return
         if self.asymmetric_obstacles():
-            msg.linear.x = 0.0
-            # Turn away from closer side
-            if self.min_left < self.min_right:
-                msg.angular.z = -self.turn_speed  # closer on left -> turn right
-            else:
-                msg.angular.z = self.turn_speed   # closer on right -> turn left
+            self.start_avoid_turn()
+            msg = self.rotate_toward(self.avoid_target_yaw)
             self.cmd_pub.publish(msg)
             return
 
@@ -234,7 +265,15 @@ class Project1Controller(Node):
 
         # PRIORITY 6: Drive forward
         msg.linear.x = self.forward_speed
-        msg.angular.z = 0.0
+
+        # small bias away from closer side (gentle, not "avoid")
+        if math.isfinite(self.min_left) and math.isfinite(self.min_right):
+            diff = self.min_right - self.min_left  # positive means left is closer
+            k = 0.6  # steering gain (tune 0.3 to 1.0)
+            msg.angular.z = max(min(k * diff, 0.6), -0.6)
+        else:
+            msg.angular.z = 0.0
+
         self.cmd_pub.publish(msg)
 
 
