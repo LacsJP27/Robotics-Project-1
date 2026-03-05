@@ -9,12 +9,13 @@ import math
 import random
 import time
 
+# Helper functions for working with angles and quaternions
 def yaw_from_quat(x: float, y: float, z: float, w: float) -> float:
     siny_cosp = 2.0 * (w * z + x * y)
     cosy_cosp = 1.0 - 2.0 * (y * y + z * z)
     return math.atan2(siny_cosp, cosy_cosp)
 
-
+# Wraps angle to [-pi..pi]
 def wrap_to_pi(a: float) -> float:
     while a > math.pi:
         a -= 2.0 * math.pi
@@ -26,6 +27,10 @@ def wrap_to_pi(a: float) -> float:
 def angle_diff(target: float, current: float) -> float:
     return wrap_to_pi(target - current)
 
+# Timeout for escape behavior to prevent getting "stuck" 
+# if something goes wrong (i.e. we fail to turn enough to 
+# clear the obstacle, or we have a bad scan reading that 
+# triggers escape but there's actually no obstacle there)
 ESCAPE_TIMEOUT_SEC = 3.0
 
 class Project1Controller(Node):
@@ -97,7 +102,7 @@ class Project1Controller(Node):
 
         angle = msg.angle_min
         for r in msg.ranges:
-            if math.isfinite(r) and r >= msg.range_min and r <= msg.range_max:
+            if math.isfinite(r):
                 a = wrap_to_pi(angle)  # IMPORTANT: converts [0..2pi] to [-pi..pi] around "front=0"
                 if abs(a) <= self.front_half_angle:
                     if r < min_front:
@@ -118,6 +123,10 @@ class Project1Controller(Node):
         # Approx collision detection using scan
         self.is_colliding = (self.min_front < self.collision_thresh_m)
 
+    # Note: we could use odom for more advanced behaviors like escape/avoid 
+    # but for simplicity in this project we just use it for the random turn 
+    # behavior since it requires tracking distance traveled which is more 
+    # robust using odom than scan
     def odom_callback(self, msg: Odometry):
         # Store pose + yaw
         self.x = msg.pose.pose.position.x
@@ -201,12 +210,6 @@ class Project1Controller(Node):
         if not (self.have_scan and self.have_odom):
             return
 
-        self.get_logger().info(
-            f"front={self.min_front:.2f} left={self.min_left:.2f} right={self.min_right:.2f} "
-            f"escape={self.escape_active} rand_turn={self.random_turn_active}"
-            f" avoid={self.avoid_active}"
-            f"front_blocked={self.front_is_blocked()}"
-        )
         msg = Twist()
 
         # PRIORITY 1: Halt on collision
@@ -214,7 +217,8 @@ class Project1Controller(Node):
             if not self.escape_active:
                 self.start_escape()
             msg = self.rotate_toward(self.escape_target_yaw)
-            msg.linear.x = 0.0  # Guarantee no forward motion while colliding
+            # Guarantee no forward motion while colliding
+            msg.linear.x = 0.0
             self.cmd_pub.publish(msg)
             return
             
@@ -229,17 +233,20 @@ class Project1Controller(Node):
             msg = self.rotate_toward(self.escape_target_yaw)
             elapsed = (self.get_clock().now() - self.escape_start_time).nanoseconds / 1e9
             
-            self.get_logger().info(f"ESCAPING to {math.degrees(self.escape_target_yaw):.1f} deg")
-            self.get_logger().info(f"angle_diff enough? ={abs(angle_diff(self.escape_target_yaw, self.yaw)) < 0.05} deg")
-            self.get_logger().info(f"current yaw={math.degrees(self.yaw):.1f} deg")
-            self.get_logger().info(f"target yaw={math.degrees(self.escape_target_yaw):.1f} deg")
-            
+            # Escape is complete when we're facing the target direction 
+            # or we hit the timeout, whichever comes first.
             if abs(angle_diff(self.escape_target_yaw, self.yaw)) < 0.05 or elapsed > ESCAPE_TIMEOUT_SEC:
                 self.get_logger().info("ESCAPE COMPLETE" if elapsed <= ESCAPE_TIMEOUT_SEC else "ESCAPE TIMEOUT")
                 self.escape_active = False
             self.cmd_pub.publish(msg)
             return
 
+        # Note: we check for escape first since it has a timeout 
+        # and we don't want to interrupt it, but we check for the 
+        # conditions that trigger it (symmetric obstacles or front blocked) 
+        # here so that it will start as soon as those conditions are met even 
+        # if we happen to be in the middle of another behavior like a random 
+        # turn when that happens
         if self.symmetric_obstacles() or self.front_is_blocked():
             self.start_escape()
             msg = self.rotate_toward(self.escape_target_yaw)
@@ -251,10 +258,14 @@ class Project1Controller(Node):
             msg = self.rotate_toward(self.avoid_target_yaw)
             if abs(angle_diff(self.avoid_target_yaw, self.yaw)) < 0.05:
                 self.avoid_active = False
-                self.last_turn_x = self.x     # reset wander distance counter
+                self.last_turn_x = self.x
                 self.last_turn_y = self.y
             self.cmd_pub.publish(msg)
             return
+        # Note: this check is after escape to ensure it doesn't 
+        # interrupt that behavior but before random turn to ensure 
+        # it does interrupt if we happen to detect an asymmetric 
+        # obstacle during a random turn
         if self.asymmetric_obstacles():
             self.start_avoid_turn()
             msg = self.rotate_toward(self.avoid_target_yaw)
@@ -264,13 +275,20 @@ class Project1Controller(Node):
         # PRIORITY 5: Random turn after every 1ft of forward travel
         if self.random_turn_active:
             msg = self.rotate_toward(self.random_target_yaw)
+            # If we happen to hit the distance threshold during a random turn, 
+            # #we want to finish that turn before starting another one, 
+            # so we check distance in the separate if below instead of 
+            # interrupting and starting a new random turn here
             if abs(angle_diff(self.random_target_yaw, self.yaw)) < 0.05:
                 self.random_turn_active = False
                 self.last_turn_x = self.x
                 self.last_turn_y = self.y
             self.cmd_pub.publish(msg)
             return
-
+        # Note: this check is after escape/avoid to ensure it doesn't 
+        # interrupt those behaviors but before forward motion to 
+        # ensure it does interrupt if we happen to hit the distance 
+        # threshold during a forward drive
         if self.dist_since_last_turn() >= self.one_ft_m:
             self.start_random_turn()
             msg = self.rotate_toward(self.random_target_yaw)
